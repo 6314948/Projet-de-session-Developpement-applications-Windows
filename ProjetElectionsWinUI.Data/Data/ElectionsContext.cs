@@ -15,8 +15,19 @@ namespace ProjetElectionsWinUI.Data
         // 2. Configure SQLite (chemin vers le fichier .db)
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // Crée un fichier elections.db dans le dossier de l'application WinUI
-            optionsBuilder.UseSqlite("Data Source=elections.db");
+            if (!optionsBuilder.IsConfigured)
+            {
+                // Chemin : C:\Users\[Utilisateur]\AppData\Local\ProjetElectionsWinUI\elections.db
+                string dbPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "ProjetElectionsWinUI", "elections.db");
+
+                // Crée le fichier si nécessaire
+                Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+
+                // Configure SQLite avec le chemin
+                optionsBuilder.UseSqlite($"Data Source={dbPath}");
+            }
         }
 
         // 3. Données initiales (Seed Data)
