@@ -55,3 +55,8 @@ ProjetElectionsWinUI/
 ├── Tests/ → Tests unitaires
 └── README.md → Ce fichier
 ```
+
+---
+
+## Lien vers les notes de cours
+https://projets420.gitbook.io/asp.net/420-3p3-dev.-applications-windows
