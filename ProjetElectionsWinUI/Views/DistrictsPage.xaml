@@ -40,17 +40,20 @@
 
             <TextBlock Text="Nom du district :" FontWeight="SemiBold" />
             <TextBox Text="{Binding SelectedDistrict.NomDistrict, Mode=TwoWay}"
-                     PlaceholderText="Ex: Hull" />
+            PlaceholderText="Ex: Hull" />
+            <TextBlock Text="{Binding NomDistrictErreur}" Foreground="Red" FontSize="12"/>
 
             <TextBlock Text="Population :" FontWeight="SemiBold" />
             <TextBox Text="{Binding SelectedDistrict.Population, Mode=TwoWay}"
-                     PlaceholderText="Ex: 72000" />
+            PlaceholderText="Ex: 72000" />
+            <TextBlock Text="{Binding PopulationErreur}" Foreground="Red" FontSize="12"/>
+
 
             <!-- Boutons CRUD -->
             <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 20 0 0">
                 <Button Content="Ajouter" Width="100" Command="{Binding AddDistrictCommand}" />
                 <Button Content="Modifier" Width="100" Command="{Binding UpdateDistrictCommand}" />
-                <Button Content="Supprimer" Width="100" Command="{Binding DeleteDistrictCommand}" />
+                <Button Content="Supprimer" Width="100" Click="Supprimer_Click" />
             </StackPanel>
 
         </StackPanel>

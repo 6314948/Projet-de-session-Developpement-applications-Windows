@@ -1,14 +1,102 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="ProjetElectionsWinUI.Views.CandidatsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:ProjetElectionsWinUI.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
+    <!-- Layout principal : 2 colonnes -->
+    <Grid Padding="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
 
+        <!-- Titre -->
+        <TextBlock Text="Gestion des candidats"
+                   FontSize="32"
+                   FontWeight="Bold"
+                   Margin="0 0 0 20"
+                   Grid.ColumnSpan="2" />
+
+        <!-- ========================= -->
+        <!--  LISTE DES CANDIDATS      -->
+        <!-- ========================= -->
+        <ListView Grid.Column="0"
+                  Margin="0 60 20 0"
+                  ItemsSource="{Binding Candidats}"
+                  SelectedItem="{Binding SelectedCandidat, Mode=TwoWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="5" Padding="10" Background="#EFEFEF" CornerRadius="6">
+                        <!-- Nom du candidat -->
+                        <TextBlock Text="{Binding Nom}" FontSize="20" FontWeight="SemiBold" />
+                        <!-- Parti politique -->
+                        <TextBlock Text="{Binding PartiPolitique}" />
+                        <!-- District associé -->
+                        <TextBlock>
+                            <Run Text="District : " />
+                            <Run Text="{Binding District.NomDistrict}" />
+                        </TextBlock>
+                        <!-- Votes -->
+                        <TextBlock>
+                            <Run Text="Votes : " />
+                            <Run Text="{Binding VotesObtenus}" />
+                        </TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- ========================= -->
+        <!--  FORMULAIRE CANDIDAT      -->
+        <!-- ========================= -->
+        <StackPanel Grid.Column="1" Margin="20 60 0 0" Spacing="10">
+
+            <!-- Nom -->
+            <TextBlock Text="Nom du candidat :" FontWeight="SemiBold" />
+            <TextBox Text="{Binding SelectedCandidat.Nom, Mode=TwoWay}"
+                     PlaceholderText="Ex: Maude Marquis-Bissonnette" />
+            <TextBlock Text="{Binding NomErreur}"
+                       Foreground="Red"
+                       FontSize="12" />
+
+            <!-- Parti politique -->
+            <TextBlock Text="Parti politique :" FontWeight="SemiBold" />
+            <TextBox Text="{Binding SelectedCandidat.PartiPolitique, Mode=TwoWay}"
+                     PlaceholderText="Ex: Action Gatineau" />
+            <TextBlock Text="{Binding PartiErreur}"
+                       Foreground="Red"
+                       FontSize="12" />
+
+            <!-- Votes obtenus -->
+            <TextBlock Text="Votes obtenus :" FontWeight="SemiBold" />
+            <TextBox Text="{Binding SelectedCandidat.VotesObtenus, Mode=TwoWay}"
+                     PlaceholderText="Ex: 1234"
+                     InputScope="Number" />
+            <TextBlock Text="{Binding VotesErreur}"
+                       Foreground="Red"
+                       FontSize="12" />
+
+            <!-- District (ComboBox) -->
+            <TextBlock Text="District :" FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding Districts}"
+                      SelectedValue="{Binding SelectedCandidat.DistrictElectoralId, Mode=TwoWay}"
+                      SelectedValuePath="DistrictElectoralId"
+                      DisplayMemberPath="NomDistrict"
+                      PlaceholderText="Choisir un district" />
+            <TextBlock Text="{Binding DistrictErreur}"
+                       Foreground="Red"
+                       FontSize="12" />
+
+            <!-- Boutons CRUD -->
+            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 20 0 0">
+                <Button Content="Ajouter" Width="100" Command="{Binding AddCandidatCommand}" />
+                <Button Content="Modifier" Width="100" Command="{Binding UpdateCandidatCommand}" />
+                <Button Content="Supprimer" Width="100" Click="Supprimer_Click" />
+            </StackPanel>
+
+        </StackPanel>
     </Grid>
 </Page>

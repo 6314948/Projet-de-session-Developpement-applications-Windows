@@ -11,7 +11,7 @@ using ProjetElectionsWinUI.Data;
 namespace ProjetElectionsWinUI.Data.Migrations
 {
     [DbContext(typeof(ElectionsContext))]
-    [Migration("20251120160116_MigrationInitiale")]
+    [Migration("20251127050325_MigrationInitiale")]
     partial class MigrationInitiale
     {
         /// <inheritdoc />

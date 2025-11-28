@@ -1,34 +1,45 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using ProjetElectionsWinUI.ViewModels;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace ProjetElectionsWinUI.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class DistrictsPage : Page
     {
+        public DistrictsViewModel ViewModel { get; set; }
+
         public DistrictsPage()
         {
+            this.InitializeComponent();
 
-            InitializeComponent();
-            this.DataContext = new DistrictsViewModel();
+            // On crée et on stocke le ViewModel
+            ViewModel = new DistrictsViewModel();
+
+            // On lie le ViewModel à la page
+            this.DataContext = ViewModel;
+        }
+
+        // Quand on clique sur le bouton Supprimer, On ouvre un dialogue de confirmation
+        private async void Supprimer_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Confirmation",
+                Content = "Voulez-vous vraiment supprimer ce district ?",
+                PrimaryButtonText = "Supprimer",
+                CloseButtonText = "Annuler",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = this.Content.XamlRoot
+            };
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                // Appel direct à la méthode de suppression du ViewModel
+                ViewModel.DeleteDistrict();
+            }
         }
     }
 }

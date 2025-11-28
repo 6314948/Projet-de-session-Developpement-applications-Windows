@@ -2,35 +2,36 @@
 using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data.Models;
 using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace ProjetElectionsWinUI.Data
 {
     public class ElectionsContext : DbContext
     {
-        // 1. Déclare les tables
         public DbSet<DistrictElectoral> Districts { get; set; }
         public DbSet<Candidat> Candidats { get; set; }
         public DbSet<Electeur> Electeurs { get; set; }
 
-        // 2. Configure SQLite (chemin vers le fichier .db)
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Chemin : C:\Users\[Utilisateur]\AppData\Local\ProjetElectionsWinUI\elections.db
-                string dbPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "ProjetElectionsWinUI", "elections.db");
+                string folder = @"C:\ProjetElectionsWinUI_DB";
+                Directory.CreateDirectory(folder);
 
-                // Crée le fichier si nécessaire
-                Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+                string dbPath = Path.Combine(folder, "elections.db");
 
-                // Configure SQLite avec le chemin
+                // Si le fichier n'existe pas, on le crée vide
+                if (!File.Exists(dbPath))
+                {
+                    using (File.Create(dbPath)){}
+                }
+
                 optionsBuilder.UseSqlite($"Data Source={dbPath}");
             }
         }
 
-        // 3. Données initiales (Seed Data)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Districts
