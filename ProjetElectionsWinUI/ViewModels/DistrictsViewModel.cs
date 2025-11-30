@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data;
 using ProjetElectionsWinUI.Data.Models;
 using System.Collections.ObjectModel;
@@ -18,17 +19,28 @@ namespace ProjetElectionsWinUI.ViewModels
         //  Propriétés observables (MVVM)
         // ===============================
 
-        /// <summary>
         /// Liste observable utilisée par la ListView de la page.
-        /// </summary>
         [ObservableProperty]
         private ObservableCollection<DistrictElectoral> districts;
 
-        /// <summary>
         /// District présentement sélectionné dans la liste.
-        /// </summary>
         [ObservableProperty]
         private DistrictElectoral selectedDistrict = new DistrictElectoral();
+
+        /// Liste des candidats du district sélectionné
+        [ObservableProperty]
+        private ObservableCollection<Candidat> candidatsDuDistrict = new();
+
+        // Description du gagnant (affiché dans la page)
+        [ObservableProperty]
+        private string gagnantDescription;
+
+        /// Chaque fois que le district sélectionné change, on recharge la liste des candidats du district.
+        partial void OnSelectedDistrictChanged(DistrictElectoral value)
+        {
+            LoadCandidatsDuDistrict();
+        }
+
 
         // ===============================
         //  Messages d'erreur (Validation)
@@ -87,7 +99,7 @@ namespace ProjetElectionsWinUI.ViewModels
         }
 
         // ===============================
-        //  Commande : Ajouter un district
+        //  Fonction : Ajouter un district
         // ===============================
         [RelayCommand]
         private void AddDistrict()
@@ -103,7 +115,7 @@ namespace ProjetElectionsWinUI.ViewModels
         }
 
         // ===============================
-        //  Commande : Modifier un district
+        //  Fonction : Modifier un district
         // ===============================
         [RelayCommand]
         private void UpdateDistrict()
@@ -133,6 +145,40 @@ namespace ProjetElectionsWinUI.ViewModels
 
             LoadDistricts();
             SelectedDistrict = new DistrictElectoral();
+        }
+
+        // ===============================
+        //  Fonction : Pour ajouter les candidats du district sélectionné
+        // ===============================
+        private void LoadCandidatsDuDistrict()
+        {
+            CandidatsDuDistrict.Clear();
+            GagnantDescription = ""; // reset
+
+            if (SelectedDistrict == null || SelectedDistrict.DistrictElectoralId == 0)
+            {
+                GagnantDescription = "Aucun district sélectionné.";
+                return;
+            }
+
+            var candidats = _context.Candidats
+                .Where(c => c.DistrictElectoralId == SelectedDistrict.DistrictElectoralId)
+                .OrderByDescending(c => c.VotesObtenus)
+                .ToList();
+
+            foreach (var c in candidats)
+                CandidatsDuDistrict.Add(c);
+
+            if (candidats.Any())
+            {
+                var gagnant = candidats.First(); // celui avec le plus de votes
+                GagnantDescription =
+                    $"Gagnant : {gagnant.Nom} ({gagnant.PartiPolitique}) - {gagnant.VotesObtenus} votes";
+            }
+            else
+            {
+                GagnantDescription = "Aucun candidat pour ce district.";
+            }
         }
 
     }

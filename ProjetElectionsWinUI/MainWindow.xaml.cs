@@ -27,6 +27,7 @@ namespace ProjetElectionsWinUI
         public MainWindow()
         {
             InitializeComponent();
+            this.AppWindow.Resize(new Windows.Graphics.SizeInt32(1500, 850));
             ContentFrame.Navigate(typeof(DistrictsPage)); // page de base
         }
         private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

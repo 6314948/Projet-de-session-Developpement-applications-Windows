@@ -10,11 +10,30 @@
     Title="Élections Gatineau">
 
     <NavigationView x:Name="NavView"
-                    PaneDisplayMode="Left"
-                    IsSettingsVisible="False"
-                    SelectionChanged="NavView_SelectionChanged">
+                PaneDisplayMode="Left"
+                IsSettingsVisible="False"
+                SelectionChanged="NavView_SelectionChanged">
 
-        <!-- Items du menu -->
+        <!-- ============= LOGO (PaneHeader) ============= -->
+        <NavigationView.PaneHeader>
+            <StackPanel Orientation="Horizontal" 
+                        Spacing="12">
+                <!-- Logo -->
+                <Image Source="Assets/gatineau_logo.png"
+                       Width="32"
+                       Height="32"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center" />
+
+                <!-- Titre -->
+                <TextBlock Text="Élections"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           FontSize="16" />
+            </StackPanel>
+        </NavigationView.PaneHeader>
+
+        <!-- ============= ITEMS DU MENU ============= -->
         <NavigationView.MenuItems>
 
             <NavigationViewItem Content="Districts" Tag="districts">
@@ -37,9 +56,9 @@
 
         </NavigationView.MenuItems>
 
-        <!-- Contenu : la page active -->
+        <!-- ============= CONTENU PRINCIPAL ============= -->
         <Frame x:Name="ContentFrame" />
 
     </NavigationView>
-</Window>
 
+</Window>
