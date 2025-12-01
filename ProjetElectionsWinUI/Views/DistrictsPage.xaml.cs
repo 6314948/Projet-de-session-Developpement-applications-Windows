@@ -7,20 +7,25 @@ namespace ProjetElectionsWinUI.Views
 {
     public sealed partial class DistrictsPage : Page
     {
-        public DistrictsViewModel ViewModel { get; set; }
+        /// <summary>
+        /// ViewModel associé à la page Districts.
+        /// </summary>
+        public DistrictsViewModel ViewModel { get; }
 
+        // ======================================================
+        //   Constructeur
+        // ======================================================
         public DistrictsPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
-            // On crée et on stocke le ViewModel
             ViewModel = new DistrictsViewModel();
-
-            // On lie le ViewModel à la page
-            this.DataContext = ViewModel;
+            DataContext = ViewModel;
         }
 
-        // Quand on clique sur le bouton Supprimer, On ouvre un dialogue de confirmation
+        // ======================================================
+        //   Confirmation de suppression
+        // ======================================================
         private async void Supprimer_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog
@@ -30,14 +35,13 @@ namespace ProjetElectionsWinUI.Views
                 PrimaryButtonText = "Supprimer",
                 CloseButtonText = "Annuler",
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.Content.XamlRoot
+                XamlRoot = Content.XamlRoot
             };
 
             var result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)
             {
-                // Appel direct à la méthode de suppression du ViewModel
                 ViewModel.DeleteDistrict();
             }
         }

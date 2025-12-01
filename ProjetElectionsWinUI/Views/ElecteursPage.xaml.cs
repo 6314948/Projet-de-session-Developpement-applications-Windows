@@ -7,15 +7,24 @@ namespace ProjetElectionsWinUI.Views
 {
     public sealed partial class ElecteursPage : Page
     {
+        /// <summary>
+        /// ViewModel principal de la page.
+        /// </summary>
         public ElecteursViewModel ViewModel { get; }
 
+        // ======================================================
+        //   Constructeur
+        // ======================================================
         public ElecteursPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             ViewModel = new ElecteursViewModel();
-            this.DataContext = ViewModel;
+            DataContext = ViewModel;
         }
 
+        // ======================================================
+        //   Confirmation avant suppression
+        // ======================================================
         private async void Supprimer_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog
@@ -25,7 +34,7 @@ namespace ProjetElectionsWinUI.Views
                 PrimaryButtonText = "Supprimer",
                 CloseButtonText = "Annuler",
                 DefaultButton = ContentDialogButton.Close,
-                XamlRoot = this.Content.XamlRoot
+                XamlRoot = Content.XamlRoot
             };
 
             var result = await dialog.ShowAsync();

@@ -7,15 +7,24 @@ namespace ProjetElectionsWinUI.Views
 {
     public sealed partial class CandidatsPage : Page
     {
+        /// <summary>
+        /// ViewModel associé à la page.
+        /// </summary>
         public CandidatsViewModel ViewModel { get; }
 
+        // ======================================================
+        //   Constructeur
+        // ======================================================
         public CandidatsPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
             ViewModel = new CandidatsViewModel();
-            this.DataContext = ViewModel;
+            DataContext = ViewModel;
         }
 
+        // ======================================================
+        //   Confirmation avant la suppression
+        // ======================================================
         private async void Supprimer_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog

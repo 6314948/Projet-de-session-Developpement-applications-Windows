@@ -81,7 +81,8 @@
                     <TextBlock Text="{Binding NomDistrictErreur}"
                                Foreground="Red"
                                FontSize="12"
-                               AutomationProperties.Name="Erreur : nom du district" />
+                               AutomationProperties.Name="Erreur : nom du district"
+                               TextWrapping="Wrap"/>
 
                     <!-- Population -->
                     <TextBlock Text="Population :" FontWeight="SemiBold" />
@@ -133,7 +134,7 @@
 
                     <!-- Titre -->
                     <TextBlock Grid.Row="0"
-                               Text="Candidats du district sélectionné"
+                               Text="Candidats du district selectionne"
                                FontSize="20"
                                FontWeight="Bold"
                                AutomationProperties.HeadingLevel="Level2"

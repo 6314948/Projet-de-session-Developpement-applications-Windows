@@ -60,7 +60,8 @@
                      PlaceholderText="Ex: Maude Marquis-Bissonnette" />
             <TextBlock Text="{Binding NomErreur}"
                        Foreground="Red"
-                       FontSize="12" />
+                       FontSize="12"
+                       TextWrapping="Wrap"/>
 
             <!-- Parti politique -->
             <TextBlock Text="Parti politique :" FontWeight="SemiBold" />

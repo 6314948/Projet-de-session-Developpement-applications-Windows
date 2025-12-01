@@ -11,52 +11,44 @@ namespace ProjetElectionsWinUI.ViewModels
 {
     public partial class CandidatsViewModel : ObservableObject
     {
-        // ===============================
-        //  Contexte BD (EF Core)
-        // ===============================
+        // ======================================================
+        //   Contexte de la base de données (EF Core)
+        // ======================================================
         private readonly ElectionsContext _context;
 
-        // ===============================
-        //  Propriétés observables
-        // ===============================
+        // ======================================================
+        //   Propriétés observables (MVVM)
+        // ======================================================
 
         /// <summary>
-        /// Liste des candidats affichés dans la ListView.
+        /// Liste des candidats affichés dans la page.
         /// </summary>
         [ObservableProperty]
         private ObservableCollection<Candidat> candidats;
 
         /// <summary>
-        /// Candidat sélectionné dans la liste ou en édition.
+        /// Candidat actuellement sélectionné dans la liste ou dans le formulaire.
         /// </summary>
         [ObservableProperty]
         private Candidat selectedCandidat = new Candidat();
 
         /// <summary>
-        /// Liste des districts pour la ComboBox.
+        /// Liste des districts chargée pour la ComboBox.
         /// </summary>
         [ObservableProperty]
         private ObservableCollection<DistrictElectoral> districts;
 
-        // ===============================
-        //  Messages d'erreur (validation)
-        // ===============================
+        // ======================================================
+        //   Messages d’erreur pour la validation
+        // ======================================================
+        [ObservableProperty] private string nomErreur;
+        [ObservableProperty] private string partiErreur;
+        [ObservableProperty] private string votesErreur;
+        [ObservableProperty] private string districtErreur;
 
-        [ObservableProperty]
-        private string nomErreur;
-
-        [ObservableProperty]
-        private string partiErreur;
-
-        [ObservableProperty]
-        private string votesErreur;
-
-        [ObservableProperty]
-        private string districtErreur;
-
-        // ===============================
-        //  Constructeur
-        // ===============================
+        // ======================================================
+        //   Constructeur
+        // ======================================================
         public CandidatsViewModel()
         {
             _context = new ElectionsContext();
@@ -64,9 +56,10 @@ namespace ProjetElectionsWinUI.ViewModels
             LoadCandidats();
         }
 
-        // ===============================
-        //  Chargement des données
-        // ===============================
+        // ======================================================
+        //   Chargement des données
+        // ======================================================
+
         private void LoadDistricts()
         {
             var list = _context.Districts.ToList();
@@ -75,7 +68,7 @@ namespace ProjetElectionsWinUI.ViewModels
 
         private void LoadCandidats()
         {
-            // Include pour charger aussi le District (pour l'affichage dans la liste)
+            // Include pour charger aussi le district lié
             var list = _context.Candidats
                 .Include(c => c.District)
                 .ToList();
@@ -83,14 +76,15 @@ namespace ProjetElectionsWinUI.ViewModels
             Candidats = new ObservableCollection<Candidat>(list);
         }
 
-        // ===============================
-        //  Validation
-        // ===============================
+        // ======================================================
+        //   Validation des champs du formulaire
+        // ======================================================
+
         private bool ValiderCandidat()
         {
             bool estValide = true;
 
-            // Reset des erreurs
+            // Reset des messages d'erreur
             NomErreur = "";
             PartiErreur = "";
             VotesErreur = "";
@@ -127,27 +121,48 @@ namespace ProjetElectionsWinUI.ViewModels
             return estValide;
         }
 
-        // ===============================
-        //  Commande : Ajouter un candidat
-        // ===============================
+        // ======================================================
+        //      Commande : Ajouter un candidat
+        // ======================================================
         [RelayCommand]
         private void AddCandidat()
         {
+            // Empêche l’ajout d’un candidat déjà existant
+            if (SelectedCandidat != null && SelectedCandidat.CandidatId != 0)
+            {
+                NomErreur = "Ce candidat existe déjà. Utilisez Modifier pour mettre à jour ou videz le formulaire pour ajouter un nouveau.";
+                return;
+            }
+
+            // Validation du formulaire
             if (!ValiderCandidat())
                 return;
 
-            _context.Candidats.Add(SelectedCandidat);
+            // Important : créer un nouvel objet pour éviter les conflits EF Core
+            var nouveauCandidat = new Candidat
+            {
+                Nom = SelectedCandidat.Nom,
+                PartiPolitique = SelectedCandidat.PartiPolitique,
+                VotesObtenus = SelectedCandidat.VotesObtenus,
+                DistrictElectoralId = SelectedCandidat.DistrictElectoralId
+            };
+
+            _context.Candidats.Add(nouveauCandidat);
             _context.SaveChanges();
 
-            // Recharger pour mettre à jour aussi la propriété District (Include)
+            // Rafraîchir l’affichage
             LoadCandidats();
 
-            SelectedCandidat = new Candidat(); // reset formulaire
+            // Reset du formulaire
+            SelectedCandidat = new Candidat();
+
+            // Réinitialiser les erreurs
+            NomErreur = PartiErreur = VotesErreur = DistrictErreur = "";
         }
 
-        // ===============================
-        //  Commande : Modifier un candidat
-        // ===============================
+        // ======================================================
+        //      Commande : Modifier un candidat
+        // ======================================================
         [RelayCommand]
         private void UpdateCandidat()
         {
@@ -161,11 +176,15 @@ namespace ProjetElectionsWinUI.ViewModels
             _context.SaveChanges();
 
             LoadCandidats();
+
+            // Reset du formulaire
+            SelectedCandidat = new Candidat();
         }
 
-        // ===============================
-        //  Méthode appelée depuis la page pour supprimer
-        // ===============================
+        // ======================================================
+        //      Commande : Supprimer un candidat
+        //      (appelée depuis la View, avec confirmation)
+        // ======================================================
         public void SupprimerCandidat()
         {
             if (SelectedCandidat == null || SelectedCandidat.CandidatId == 0)

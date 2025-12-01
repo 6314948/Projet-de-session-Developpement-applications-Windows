@@ -58,7 +58,8 @@
                      PlaceholderText="Ex: Jean Tremblay" />
             <TextBlock Text="{Binding NomErreur}"
                        Foreground="Red"
-                       FontSize="12" />
+                       FontSize="12"
+                       TextWrapping="Wrap"/>
 
             <!-- Adresse -->
             <TextBlock Text="Adresse :" FontWeight="SemiBold" />
@@ -70,7 +71,7 @@
 
             <!-- Date de naissance -->
             <TextBlock Text="Date de naissance :" FontWeight="SemiBold" />
-            <DatePicker Date="{Binding SelectedElecteur.DateNaissance, Mode=TwoWay}" />
+            <DatePicker Date="{Binding DateNaissancePicker, Mode=TwoWay}" />
             <TextBlock Text="{Binding DateErreur}"
                        Foreground="Red"
                        FontSize="12" />
