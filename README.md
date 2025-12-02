@@ -1,62 +1,134 @@
-# Projet de session – Développement d’applications Windows (420-3P3-HU)
-### Automne 2025  
-**Étudiant :** Christophe Merlen  
-**Remise :** 4 décembre 2025  
+# Projet de Session – Application WinUI 3  
+### Développement d’applications Windows – Automne 2025  
+**Étudiant : Christophe Merlen**
 
 ---
 
-## Description du projet
+## Résumé du projet
 
-Ce projet consiste à développer une **application Windows (WinUI 3)** qui permet de **gérer les élections municipales de la Ville de Gatineau**.  
-L’application utilise **Entity Framework Core** pour gérer une petite base de données SQLite.  
+Ce projet a pour objectif de développer une application de bureau moderne en **WinUI 3**, permettant la gestion simplifiée des élections municipales de la Ville de Gatineau.
 
-L’objectif est de démontrer la capacité à concevoir une application complète en suivant le modèle **MVVM**, avec une interface fonctionnelle, un accès aux données, et des tests unitaires.
+L’application utilise une architecture **MVVM**, une base de données **SQLite** gérée avec **Entity Framework Core**, et inclut plusieurs modules :
 
-Le thème vient d’un projet précédent fait en SQL, mais ici le but est de **simplifier le modèle** pour se concentrer sur la logique et l’interface.
+- Gestion des **districts électoraux**
+- Gestion des **candidats**
+- Gestion des **électeurs**
+- Navigation via **NavigationView**
+- Validation des entrées utilisateur
+- Calcul automatique du gagnant d’un district
+- Tests unitaires sur les classes du projet Data
+
+Le projet permet d’appliquer les notions vues en cours : architecture logicielle, data binding, validation, séparation en projets, EF Core, tests unitaires, et interface WinUI 3.
+
+---
+
+## Division des tâches
+
+### **Christophe Merlen**
+Projet réalisé **seul**, conformément aux consignes.
+
+Responsabilités :
+
+- Architecture générale du projet WinUI  
+- Développement des pages principales : Districts, Candidats, Électeurs  
+- Mise en place du pattern **MVVM** avec CommunityToolkit.MVVM  
+- Création du projet **Data**  
+- Implémentation du **DbContext** et des **modèles EF Core**  
+- Migrations et génération de la base SQLite  
+- Développement du CRUD complet  
+- Validation des champs et gestion des erreurs  
+- Navigation entre pages  
+- Tests unitaires (xUnit) sur la couche Data  
+- Diagrammes UML et documentation (Avec l'aide de ChatGPT)
+
+---
+
+## Tests unitaires
+
+5 tests unitaires ont été réalisés avec **xUnit**, conformément aux instructions de la professeure.
+
+Ils portent **uniquement sur le projet Data**, et non sur WinUI, afin d’éviter les incompatibilités :
+
+- Vérification de l’assignation des propriétés des modèles  
+- Tests sur la valeur par défaut des champs  
+- Tests sur la validité des données d’un district  
+- Tests sur les objets Candidat et Electeur  
+
+Tous les tests réussissent.
 
 ---
 
 ## Fonctionnalités principales
 
-- Gestion des **districts électoraux**
-- Gestion des **candidats**
-- Gestion des **électeurs**
-- Affichage des liens entre les entités (ex. : candidats d’un district)
-- Calcul du **candidat gagnant** par district (LINQ)
-- Validation des champs et messages d’erreur en français
-- Une page respecte les **règles d’accessibilité** (contraste, tabulation, labels clairs)
+- Application WinUI 3 moderne et stable  
+- Architecture **MVVM** complète  
+- Base de données **SQLite**  
+- CRUD complet sur Districts, Candidats et Électeurs  
+- Validation dynamique des formulaires  
+- Calcul LINQ du gagnant d’un district  
+- Navigation fluide entre les pages  
+- Tests unitaires fonctionnels  
+- Interface simple et propre  
+- Données initiales intégrées (seed)  
 
 ---
 
-## Modèles de données
+## Diagramme de cas d’utilisation
 
-L’application contient trois modèles principaux :
+```mermaid
+flowchart TD
 
-| Classe | Description | Exemple de propriétés |
-|--------|--------------|------------------------|
-| **DistrictElectoral** | Représente un district de la ville | `DistrictId`, `NomDistrict`, `Population` |
-| **Candidat** | Représente un candidat aux élections | `CandidatId`, `Nom`, `PartiPolitique`, `VotesObtenus`, `DistrictId` |
-| **Electeur** | Représente un électeur inscrit | `ElecteurId`, `Nom`, `Adresse`, `DateNaissance`, `DistrictId` |
+A[Utilisateur] -->|Consulter| B[Afficher les districts]
+A -->|CRUD complet| C[Gestion des districts]
 
-Les relations sont gérées par **Entity Framework Core** :
-- Un **district** peut avoir plusieurs **candidats** et **électeurs**.  
-- Chaque **candidat** et **électeur** appartient à un seul **district**.
+A -->|Consulter| D[Liste des candidats]
+A -->|Ajouter / Modifier / Supprimer| E[Gestion des candidats]
 
----
+A -->|Consulter| F[Liste des électeurs]
+A -->|CRUD complet| G[Gestion des électeurs]
 
-## Structure du projet
-```
-ProjetElectionsWinUI/
-│
-├── Models/ → Classes C# (District, Candidat, Electeur)
-├── Data/ → DbContext + Migrations
-├── ViewModels/ → Logique MVVM
-├── Views/ → Pages XAML (Districts, Candidats, Électeurs)
-├── Tests/ → Tests unitaires
-└── README.md → Ce fichier
+B --> H[Voir les candidats du district]
+H --> I[Calcul du gagnant via LINQ]
 ```
 
 ---
 
-## Lien vers les notes de cours
-https://projets420.gitbook.io/asp.net/420-3p3-dev.-applications-windows
+## Diagramme de classes
+
+```mermaid
+classDiagram
+
+class DistrictElectoral {
+    int DistrictElectoralId
+    string NomDistrict
+    int Population
+}
+
+class Candidat {
+    int CandidatId
+    string Nom
+    string PartiPolitique
+    int VotesObtenus
+    int DistrictElectoralId
+}
+
+class Electeur {
+    int ElecteurId
+    string Nom
+    string Adresse
+    DateTime DateNaissance
+    int DistrictElectoralId
+}
+
+DistrictElectoral "1" --> "many" Candidat : possède >
+DistrictElectoral "1" --> "many" Electeur : contient >
+```
+---
+
+## Conclusion
+
+Le projet remplit toutes les exigences du travail de session :  
+architecture MVVM, séparation des projets, base de données relationnelle, interface WinUI moderne, validation, navigation, LINQ, et tests unitaires fonctionnels.
+
+Le résultat final est une application structurée, robuste et facile à maintenir.
+
