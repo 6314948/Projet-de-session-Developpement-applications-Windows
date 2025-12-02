@@ -89,12 +89,10 @@ A -->|CRUD complet| G[Gestion des électeurs]
 
 B --> H[Voir les candidats du district]
 H --> I[Calcul du gagnant via LINQ]
+```
 
 ---
 
-# Diagramme UML de classes (Mermaid)**
-
-```md
 ## Diagramme de classes
 
 ```mermaid
@@ -124,7 +122,7 @@ class Electeur {
 
 DistrictElectoral "1" --> "many" Candidat : possède >
 DistrictElectoral "1" --> "many" Electeur : contient >
-
+```
 ---
 
 ## Conclusion
