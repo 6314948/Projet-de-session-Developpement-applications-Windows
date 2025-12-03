@@ -132,3 +132,8 @@ architecture MVVM, séparation des projets, base de données relationnelle, inte
 
 Le résultat final est une application structurée, robuste et facile à maintenir.
 
+---
+
+## Notes de cours
+
+https://projets420.gitbook.io/asp.net/420-3p3-dev.-applications-windows
