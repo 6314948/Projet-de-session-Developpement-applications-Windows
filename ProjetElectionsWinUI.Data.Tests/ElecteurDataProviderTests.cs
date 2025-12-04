@@ -1,39 +1,50 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjetElectionsWinUi.Data.Models;
+﻿using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data;
 using ProjetElectionsWinUI.Data.Data;
+using ProjetElectionsWinUI.Data.Models;
+using System;
+using System.Linq;
+using Xunit;
 
-public class ElecteurDataProviderTests
+namespace ProjetElectionsWinUI.Tests
 {
-    private ElectionsContext GetContext()
+    /// <summary>
+    /// Tests unitaires pour ElecteurDataProvider.
+    /// </summary>
+    public class ElecteurDataProviderTests
     {
-        var options = new DbContextOptionsBuilder<ElectionsContext>()
-            .UseInMemoryDatabase("ElecteurTestDB")
-            .Options;
+        private ElectionsContext CreateContext() => new ElectionsContext();
 
-        return new ElectionsContext(options);
-    }
-
-    [Fact]
-    public void DeleteElecteur_ShouldRemoveIt()
-    {
-        var context = GetContext();
-
-        var e = new Electeur
+        [Fact]
+        public void AddAndDeleteElecteur_WorksCorrectly()
         {
-            Nom = "Test",
-            Adresse = "123 rue",
-            DateNaissance = new DateTime(1990, 1, 1),
-            DistrictElectoralId = 1
-        };
+            using var context = CreateContext();
 
-        context.Electeurs.Add(e);
-        context.SaveChanges();
+            var districtProvider = new DistrictDataProvider(context);
+            var electeurProvider = new ElecteurDataProvider(context);
 
-        var provider = new ElecteurDataProvider(context);
+            var anyDistrict = districtProvider.GetAll().First();
+            int districtId = anyDistrict.DistrictElectoralId;
 
-        provider.Delete(e.ElecteurId);
+            var newElecteur = new Electeur
+            {
+                Nom = "Électeur Test Unitaire",
+                Adresse = "123 Rue des Tests",
+                DateNaissance = new DateTime(1995, 1, 1),
+                DistrictElectoralId = districtId
+            };
 
-        Assert.Empty(provider.GetAll());
+            electeurProvider.Add(newElecteur);
+
+            var electeurs = electeurProvider.GetAll();
+
+            var created = electeurs.FirstOrDefault(e => e.Nom == "Électeur Test Unitaire");
+            Assert.NotNull(created);
+
+            electeurProvider.Delete(created!.ElecteurId);
+
+            var electeursAfterDelete = electeurProvider.GetAll();
+            Assert.DoesNotContain(electeursAfterDelete, e => e.ElecteurId == created.ElecteurId);
+        }
     }
 }

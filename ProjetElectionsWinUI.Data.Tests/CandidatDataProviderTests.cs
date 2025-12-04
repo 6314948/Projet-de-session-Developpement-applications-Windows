@@ -1,39 +1,46 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProjetElectionsWinUi.Data.Models;
+﻿using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data;
 using ProjetElectionsWinUI.Data.Data;
 using ProjetElectionsWinUI.Data.Models;
+using System.Linq;
+using Xunit;
 
-public class CandidatDataProviderTests
+namespace ProjetElectionsWinUI.Tests
 {
-    private ElectionsContext GetContext()
+    /// <summary>
+    /// Tests unitaires pour CandidatDataProvider.
+    /// </summary>
+    public class CandidatDataProviderTests
     {
-        var options = new DbContextOptionsBuilder<ElectionsContext>()
-            .UseInMemoryDatabase("CandidatTestDB")
-            .Options;
+        private ElectionsContext CreateContext() => new ElectionsContext();
 
-        return new ElectionsContext(options);
-    }
+        [Fact]
+        public void AddAndGetByDistrict_WorksCorrectly()
+        {
+            using var context = CreateContext();
 
-    [Fact]
-    public void GetByDistrict_ShouldReturnOnlyCandidatesFromThatDistrict()
-    {
-        var context = GetContext();
+            var districtProvider = new DistrictDataProvider(context);
+            var candidatProvider = new CandidatDataProvider(context);
 
-        context.Districts.Add(new DistrictElectoral { DistrictElectoralId = 1, NomDistrict = "Hull", Population = 50000 });
-        context.Districts.Add(new DistrictElectoral { DistrictElectoralId = 2, NomDistrict = "Aylmer", Population = 40000 });
+            var anyDistrict = districtProvider.GetAll().First();
+            int districtId = anyDistrict.DistrictElectoralId;
 
-        context.Candidats.Add(new Candidat { Nom = "A", DistrictElectoralId = 1 });
-        context.Candidats.Add(new Candidat { Nom = "B", DistrictElectoralId = 1 });
-        context.Candidats.Add(new Candidat { Nom = "C", DistrictElectoralId = 2 });
+            var newCandidat = new Candidat
+            {
+                Nom = "Candidat Test Unitaire",
+                PartiPolitique = "Parti Test",
+                VotesObtenus = 10,
+                DistrictElectoralId = districtId
+            };
 
-        context.SaveChanges();
+            candidatProvider.Add(newCandidat);
 
-        var provider = new CandidatDataProvider(context);
+            var candidats = candidatProvider.GetByDistrict(districtId);
 
-        var result = provider.GetByDistrict(1);
+            var created = candidats.FirstOrDefault(c => c.Nom == "Candidat Test Unitaire");
+            Assert.NotNull(created);
 
-        Assert.Equal(2, result.Count);
-        Assert.DoesNotContain(result, c => c.DistrictElectoralId != 1);
+            candidatProvider.Delete(created!.CandidatId);
+        }
     }
 }

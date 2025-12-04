@@ -1,19 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Xunit;
 using ProjetElectionsWinUI.Data;
 
-public class ElectionsContextTests
+namespace ProjetElectionsWinUI.Tests
 {
-    [Fact]
-    public void Context_ShouldInitializeDbSets()
+    /// <summary>
+    /// Test du contexte de base de données (ElectionsContext).
+    /// Vérifie que la connexion à SQLite fonctionne correctement.
+    /// </summary>
+    public class ElectionsContextTests
     {
-        var options = new DbContextOptionsBuilder<ElectionsContext>()
-            .UseInMemoryDatabase("ContextTestDB")
-            .Options;
+        private ElectionsContext CreateContext() => new ElectionsContext();
 
-        var context = new ElectionsContext(options);
+        [Fact]
+        public void ElectionsContext_CanConnectToDatabase()
+        {
+            using var context = CreateContext();
 
-        Assert.NotNull(context.Candidats);
-        Assert.NotNull(context.Districts);
-        Assert.NotNull(context.Electeurs);
+            bool canConnect = context.Database.CanConnect();
+
+            Assert.True(canConnect);
+        }
     }
 }
