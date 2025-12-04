@@ -1,47 +1,34 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
 using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data;
+using ProjetElectionsWinUI.Data.Data;
 using ProjetElectionsWinUI.Data.Models;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace ProjetElectionsWinUI.ViewModels
 {
     public partial class ElecteursViewModel : ObservableObject
     {
         // ======================================================
-        //   Contexte BD (EF Core)
+        //   Providers (accès BD)
         // ======================================================
-        private readonly ElectionsContext _context;
+        private readonly ElecteurDataProvider _electeurProvider;
+        private readonly DistrictDataProvider _districtProvider;
 
         // ======================================================
         //   Propriétés observables (MVVM)
         // ======================================================
-
-        /// <summary>
-        /// Liste complète des électeurs affichée dans la page.
-        /// </summary>
         [ObservableProperty]
         private ObservableCollection<Electeur> electeurs;
 
-        /// <summary>
-        /// Électeur sélectionné dans la liste ou dans le formulaire.
-        /// </summary>
         [ObservableProperty]
         private Electeur selectedElecteur = new Electeur();
 
-        /// <summary>
-        /// Liste des districts pour la ComboBox.
-        /// </summary>
         [ObservableProperty]
         private ObservableCollection<DistrictElectoral> districts;
 
-        /// <summary>
-        /// Propriété intermédiaire utilisée par le DatePicker (DateTimeOffset).
-        /// </summary>
         [ObservableProperty]
         private DateTimeOffset dateNaissancePicker = DateTimeOffset.Now.AddYears(-18);
 
@@ -58,75 +45,53 @@ namespace ProjetElectionsWinUI.ViewModels
         // ======================================================
         public ElecteursViewModel()
         {
-            _context = new ElectionsContext();
+            var context = new ElectionsContext();
+            _electeurProvider = new ElecteurDataProvider(context);
+            _districtProvider = new DistrictDataProvider(context);
 
             LoadDistricts();
             LoadElecteurs();
-
-            // Si un électeur est déjà chargé avec une date valide
-            if (SelectedElecteur.DateNaissance != default)
-            {
-                DateNaissancePicker = new DateTimeOffset(SelectedElecteur.DateNaissance);
-            }
         }
 
         // ======================================================
         //   Synchronisation DatePicker ↔ Modèle
         // ======================================================
-
-        /// <summary>
-        /// Quand l’utilisateur change la date dans le DatePicker.
-        /// </summary>
         partial void OnDateNaissancePickerChanged(DateTimeOffset value)
         {
             if (SelectedElecteur != null)
                 SelectedElecteur.DateNaissance = value.DateTime;
         }
 
-        /// <summary>
-        /// Quand on change l’électeur sélectionné dans la liste.
-        /// </summary>
         partial void OnSelectedElecteurChanged(Electeur value)
         {
             if (value != null && value.DateNaissance != default)
-            {
                 DateNaissancePicker = new DateTimeOffset(value.DateNaissance);
-            }
             else
-            {
                 DateNaissancePicker = DateTimeOffset.Now.AddYears(-18);
-            }
         }
 
         // ======================================================
         //   Chargement des données
         // ======================================================
-
         private void LoadDistricts()
         {
-            Districts = new ObservableCollection<DistrictElectoral>(
-                _context.Districts.ToList()
-            );
+            var list = _districtProvider.GetAll();
+            Districts = new ObservableCollection<DistrictElectoral>(list);
         }
 
         private void LoadElecteurs()
         {
-            var list = _context.Electeurs
-                .Include(e => e.District)
-                .ToList();
-
+            var list = _electeurProvider.GetAll();
             Electeurs = new ObservableCollection<Electeur>(list);
         }
 
         // ======================================================
         //   Validation
         // ======================================================
-
         private bool ValiderElecteur()
         {
             bool valide = true;
 
-            // Reset messages
             NomErreur = AdresseErreur = DateErreur = DistrictErreur = "";
 
             if (string.IsNullOrWhiteSpace(SelectedElecteur.Nom))
@@ -144,13 +109,13 @@ namespace ProjetElectionsWinUI.ViewModels
             if (SelectedElecteur.DateNaissance < new DateTime(1900, 1, 1) ||
                 SelectedElecteur.DateNaissance > DateTime.Today)
             {
-                DateErreur = "Vous devez choisir une date valide.";
+                DateErreur = "Date invalide, veuillez entrer une date valide.";
                 valide = false;
             }
 
             if (SelectedElecteur.DistrictElectoralId == 0)
             {
-                DistrictErreur = "Vous devez choisir un district.";
+                DistrictErreur = "Choisissez un district.";
                 valide = false;
             }
 
@@ -158,22 +123,21 @@ namespace ProjetElectionsWinUI.ViewModels
         }
 
         // ======================================================
-        //   Commande : Ajouter un électeur
+        //   Ajouter un électeur
         // ======================================================
         [RelayCommand]
         private void AddElecteur()
         {
-            // Empêcher d’ajouter un électeur existant
             if (SelectedElecteur != null && SelectedElecteur.ElecteurId != 0)
             {
-                NomErreur = "Cet électeur existe déjà. Utilisez Modifier pour l’éditer ou videz le formulaire pour en ajouter un nouveau.";
+                NomErreur = "Cet électeur existe déjà. Utilisez Modifier pour vider le formulaire.";
                 return;
             }
 
             if (!ValiderElecteur())
                 return;
 
-            var nouvelElecteur = new Electeur
+            var nouvel = new Electeur
             {
                 Nom = SelectedElecteur.Nom,
                 Adresse = SelectedElecteur.Adresse,
@@ -181,21 +145,17 @@ namespace ProjetElectionsWinUI.ViewModels
                 DistrictElectoralId = SelectedElecteur.DistrictElectoralId
             };
 
-            _context.Electeurs.Add(nouvelElecteur);
-            _context.SaveChanges();
-
+            _electeurProvider.Add(nouvel);
             LoadElecteurs();
 
             SelectedElecteur = new Electeur
             {
                 DateNaissance = DateTime.Now.AddYears(-18)
             };
-
-            NomErreur = AdresseErreur = DateErreur = DistrictErreur = "";
         }
 
         // ======================================================
-        //   Commande : Modifier un électeur
+        //   Modifier un électeur
         // ======================================================
         [RelayCommand]
         private void UpdateElecteur()
@@ -206,9 +166,7 @@ namespace ProjetElectionsWinUI.ViewModels
             if (!ValiderElecteur())
                 return;
 
-            _context.Electeurs.Update(SelectedElecteur);
-            _context.SaveChanges();
-
+            _electeurProvider.Update(SelectedElecteur);
             LoadElecteurs();
 
             SelectedElecteur = new Electeur
@@ -218,16 +176,14 @@ namespace ProjetElectionsWinUI.ViewModels
         }
 
         // ======================================================
-        //   Commande : Supprimer un électeur
+        //   Supprimer un électeur
         // ======================================================
         public void SupprimerElecteur()
         {
             if (SelectedElecteur == null || SelectedElecteur.ElecteurId == 0)
                 return;
 
-            _context.Electeurs.Remove(SelectedElecteur);
-            _context.SaveChanges();
-
+            _electeurProvider.Delete(SelectedElecteur.ElecteurId);
             LoadElecteurs();
 
             SelectedElecteur = new Electeur

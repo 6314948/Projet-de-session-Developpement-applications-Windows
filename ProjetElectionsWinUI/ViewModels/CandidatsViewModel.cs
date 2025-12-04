@@ -1,45 +1,36 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.EntityFrameworkCore;
 using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data;
+using ProjetElectionsWinUI.Data.Data;
 using ProjetElectionsWinUI.Data.Models;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace ProjetElectionsWinUI.ViewModels
 {
     public partial class CandidatsViewModel : ObservableObject
     {
         // ======================================================
-        //   Contexte de la base de données (EF Core)
+        //   Providers (accès aux données)
         // ======================================================
-        private readonly ElectionsContext _context;
+        private readonly CandidatDataProvider _candidatProvider;
+        private readonly DistrictDataProvider _districtProvider;
 
         // ======================================================
         //   Propriétés observables (MVVM)
         // ======================================================
 
-        /// <summary>
-        /// Liste des candidats affichés dans la page.
-        /// </summary>
         [ObservableProperty]
         private ObservableCollection<Candidat> candidats;
 
-        /// <summary>
-        /// Candidat actuellement sélectionné dans la liste ou dans le formulaire.
-        /// </summary>
         [ObservableProperty]
         private Candidat selectedCandidat = new Candidat();
 
-        /// <summary>
-        /// Liste des districts chargée pour la ComboBox.
-        /// </summary>
         [ObservableProperty]
         private ObservableCollection<DistrictElectoral> districts;
 
         // ======================================================
-        //   Messages d’erreur pour la validation
+        //   Messages d’erreur (validation)
         // ======================================================
         [ObservableProperty] private string nomErreur;
         [ObservableProperty] private string partiErreur;
@@ -51,7 +42,10 @@ namespace ProjetElectionsWinUI.ViewModels
         // ======================================================
         public CandidatsViewModel()
         {
-            _context = new ElectionsContext();
+            var context = new ElectionsContext();
+            _candidatProvider = new CandidatDataProvider(context);
+            _districtProvider = new DistrictDataProvider(context);
+
             LoadDistricts();
             LoadCandidats();
         }
@@ -59,62 +53,51 @@ namespace ProjetElectionsWinUI.ViewModels
         // ======================================================
         //   Chargement des données
         // ======================================================
-
         private void LoadDistricts()
         {
-            var list = _context.Districts.ToList();
+            var list = _districtProvider.GetAll();
             Districts = new ObservableCollection<DistrictElectoral>(list);
         }
 
         private void LoadCandidats()
         {
-            // Include pour charger aussi le district lié
-            var list = _context.Candidats
-                .Include(c => c.District)
-                .ToList();
-
+            var list = _candidatProvider.GetAll();
             Candidats = new ObservableCollection<Candidat>(list);
         }
 
         // ======================================================
-        //   Validation des champs du formulaire
+        //   Validation
         // ======================================================
-
         private bool ValiderCandidat()
         {
             bool estValide = true;
 
-            // Reset des messages d'erreur
             NomErreur = "";
             PartiErreur = "";
             VotesErreur = "";
             DistrictErreur = "";
 
-            // Nom obligatoire
             if (string.IsNullOrWhiteSpace(SelectedCandidat.Nom))
             {
-                NomErreur = "Le nom du candidat est obligatoire.";
+                NomErreur = "Le nom est obligatoire.";
                 estValide = false;
             }
 
-            // Parti obligatoire
             if (string.IsNullOrWhiteSpace(SelectedCandidat.PartiPolitique))
             {
-                PartiErreur = "Le parti politique est obligatoire.";
+                PartiErreur = "Le parti est obligatoire.";
                 estValide = false;
             }
 
-            // Votes >= 0
             if (SelectedCandidat.VotesObtenus < 0)
             {
-                VotesErreur = "Le nombre de votes doit être positif ou nul.";
+                VotesErreur = "Les votes doivent être positifs.";
                 estValide = false;
             }
 
-            // District obligatoire
             if (SelectedCandidat.DistrictElectoralId == 0)
             {
-                DistrictErreur = "Vous devez choisir un district.";
+                DistrictErreur = "Sélectionnez un district.";
                 estValide = false;
             }
 
@@ -122,24 +105,21 @@ namespace ProjetElectionsWinUI.ViewModels
         }
 
         // ======================================================
-        //      Commande : Ajouter un candidat
+        //   Ajouter un candidat
         // ======================================================
         [RelayCommand]
         private void AddCandidat()
         {
-            // Empêche l’ajout d’un candidat déjà existant
             if (SelectedCandidat != null && SelectedCandidat.CandidatId != 0)
             {
-                NomErreur = "Ce candidat existe déjà. Utilisez Modifier pour mettre à jour ou videz le formulaire pour ajouter un nouveau.";
+                NomErreur = "Ce candidat existe déjà. Utilisez Modifier pour vider le formulaire.";
                 return;
             }
 
-            // Validation du formulaire
             if (!ValiderCandidat())
                 return;
 
-            // Important : créer un nouvel objet pour éviter les conflits EF Core
-            var nouveauCandidat = new Candidat
+            var nouveau = new Candidat
             {
                 Nom = SelectedCandidat.Nom,
                 PartiPolitique = SelectedCandidat.PartiPolitique,
@@ -147,21 +127,13 @@ namespace ProjetElectionsWinUI.ViewModels
                 DistrictElectoralId = SelectedCandidat.DistrictElectoralId
             };
 
-            _context.Candidats.Add(nouveauCandidat);
-            _context.SaveChanges();
-
-            // Rafraîchir l’affichage
+            _candidatProvider.Add(nouveau);
             LoadCandidats();
-
-            // Reset du formulaire
             SelectedCandidat = new Candidat();
-
-            // Réinitialiser les erreurs
-            NomErreur = PartiErreur = VotesErreur = DistrictErreur = "";
         }
 
         // ======================================================
-        //      Commande : Modifier un candidat
+        //   Modifier un candidat
         // ======================================================
         [RelayCommand]
         private void UpdateCandidat()
@@ -172,28 +144,23 @@ namespace ProjetElectionsWinUI.ViewModels
             if (!ValiderCandidat())
                 return;
 
-            _context.Candidats.Update(SelectedCandidat);
-            _context.SaveChanges();
-
+            _candidatProvider.Update(SelectedCandidat);
             LoadCandidats();
 
-            // Reset du formulaire
             SelectedCandidat = new Candidat();
         }
 
         // ======================================================
-        //      Commande : Supprimer un candidat
-        //      (appelée depuis la View, avec confirmation)
+        //   Supprimer un candidat
         // ======================================================
         public void SupprimerCandidat()
         {
             if (SelectedCandidat == null || SelectedCandidat.CandidatId == 0)
                 return;
 
-            _context.Candidats.Remove(SelectedCandidat);
-            _context.SaveChanges();
-
+            _candidatProvider.Delete(SelectedCandidat.CandidatId);
             LoadCandidats();
+
             SelectedCandidat = new Candidat();
         }
     }
