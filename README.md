@@ -45,14 +45,14 @@ Responsabilités :
 
 ## Tests unitaires
 
-5 tests unitaires ont été réalisés avec **xUnit**, conformément aux instructions de la professeure.
+5 tests unitaires ont été réalisés avec **xUnit**.
 
 Ils portent **uniquement sur le projet Data**, et non sur WinUI, afin d’éviter les incompatibilités :
 
-- Vérification de l’assignation des propriétés des modèles  
-- Tests sur la valeur par défaut des champs  
-- Tests sur la validité des données d’un district  
-- Tests sur les objets Candidat et Electeur  
+- **ElectionsContext** : vérifie que la base SQLite peut être créée et que la connexion est fonctionnelle.
+- **DistrictDataProvider** : test de récupération des districts seedés, ajout et suppression d’un district.
+- **CandidatDataProvider** : ajout d’un candidat et récupération par district.
+- **ElecteurDataProvider** : ajout d’un électeur puis suppression sécurisée. 
 
 Tous les tests réussissent.
 
