@@ -39,7 +39,7 @@ Responsabilités :
 - Validation des champs et gestion des erreurs  
 - Navigation entre pages  
 - Tests unitaires (xUnit) sur la couche Data  
-- Diagrammes UML et documentation (Avec l'aide de ChatGPT)
+- Diagrammes UML, Commentaires du code et documentation (Avec l'aide de ChatGPT)
 
 ---
 
