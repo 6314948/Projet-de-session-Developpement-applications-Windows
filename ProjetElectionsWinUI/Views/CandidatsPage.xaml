@@ -6,53 +6,71 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <!-- Layout principal : 2 colonnes -->
+    <!--
+        Page pour gérer les candidats : liste à gauche et formulaire à droite.
+        J’ai utilisé un Grid avec 2 colonnes pour faire un layout simple et clair.
+    -->
     <Grid Padding="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Titre -->
+        <!-- ============================== -->
+        <!--             TITRE              -->
+        <!-- ============================== -->
         <TextBlock Text="Gestion des candidats"
                    FontSize="32"
                    FontWeight="Bold"
                    Margin="0 0 0 20"
                    Grid.ColumnSpan="2" />
 
-        <!-- ========================= -->
-        <!--  LISTE DES CANDIDATS      -->
-        <!-- ========================= -->
+        <!-- ============================== -->
+        <!--     LISTE DES CANDIDATS        -->
+        <!-- ============================== -->
         <ListView Grid.Column="0"
                   Margin="0 60 20 0"
                   ItemsSource="{Binding Candidats}"
                   SelectedItem="{Binding SelectedCandidat, Mode=TwoWay}">
+
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Margin="5" Padding="10" Background="#EFEFEF" CornerRadius="6">
-                        <!-- Nom du candidat -->
-                        <TextBlock Text="{Binding Nom}" FontSize="20" FontWeight="SemiBold" />
-                        <!-- Parti politique -->
+                    <StackPanel Margin="5"
+                                Padding="10"
+                                Background="#EFEFEF"
+                                CornerRadius="6">
+
+                        <!-- Nom -->
+                        <TextBlock Text="{Binding Nom}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold" />
+
+                        <!-- Parti -->
                         <TextBlock Text="{Binding PartiPolitique}" />
-                        <!-- District associé -->
+
+                        <!-- District -->
                         <TextBlock>
                             <Run Text="District : " />
                             <Run Text="{Binding District.NomDistrict}" />
                         </TextBlock>
+
                         <!-- Votes -->
                         <TextBlock>
                             <Run Text="Votes : " />
                             <Run Text="{Binding VotesObtenus}" />
                         </TextBlock>
+
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
-        <!-- ========================= -->
-        <!--  FORMULAIRE CANDIDAT      -->
-        <!-- ========================= -->
-        <StackPanel Grid.Column="1" Margin="20 60 0 0" Spacing="10">
+        <!-- ============================== -->
+        <!--        FORMULAIRE (droite)     -->
+        <!-- ============================== -->
+        <StackPanel Grid.Column="1"
+                    Margin="20 60 0 0"
+                    Spacing="10">
 
             <!-- Nom -->
             <TextBlock Text="Nom du candidat :" FontWeight="SemiBold" />
@@ -63,7 +81,7 @@
                        FontSize="12"
                        TextWrapping="Wrap"/>
 
-            <!-- Parti politique -->
+            <!-- Parti -->
             <TextBlock Text="Parti politique :" FontWeight="SemiBold" />
             <TextBox Text="{Binding SelectedCandidat.PartiPolitique, Mode=TwoWay}"
                      PlaceholderText="Ex: Action Gatineau" />
@@ -71,7 +89,7 @@
                        Foreground="Red"
                        FontSize="12" />
 
-            <!-- Votes obtenus -->
+            <!-- Votes -->
             <TextBlock Text="Votes obtenus :" FontWeight="SemiBold" />
             <TextBox Text="{Binding SelectedCandidat.VotesObtenus, Mode=TwoWay}"
                      PlaceholderText="Ex: 1234"
@@ -80,7 +98,7 @@
                        Foreground="Red"
                        FontSize="12" />
 
-            <!-- District (ComboBox) -->
+            <!-- District ComboBox -->
             <TextBlock Text="District :" FontWeight="SemiBold" />
             <ComboBox ItemsSource="{Binding Districts}"
                       SelectedValue="{Binding SelectedCandidat.DistrictElectoralId, Mode=TwoWay}"
@@ -92,10 +110,23 @@
                        FontSize="12" />
 
             <!-- Boutons CRUD -->
-            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0 20 0 0">
-                <Button Content="Ajouter" Width="100" Command="{Binding AddCandidatCommand}" />
-                <Button Content="Modifier" Width="100" Command="{Binding UpdateCandidatCommand}" />
-                <Button Content="Supprimer" Width="100" Click="Supprimer_Click" />
+            <StackPanel Orientation="Horizontal"
+                        Spacing="10"
+                        Margin="0 20 0 0">
+
+                <Button Content="Ajouter"
+                        Width="100"
+                        Command="{Binding AddCandidatCommand}" />
+
+                <Button Content="Modifier"
+                        Width="100"
+                        Command="{Binding UpdateCandidatCommand}" />
+
+                <!-- La suppression reste gérée dans code-behind (dialogue de confirmation) -->
+                <Button Content="Supprimer"
+                        Width="100"
+                        Click="Supprimer_Click" />
+
             </StackPanel>
 
         </StackPanel>

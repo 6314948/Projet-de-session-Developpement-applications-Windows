@@ -4,6 +4,11 @@ using ProjetElectionsWinUI.Data.Models;
 
 namespace ProjetElectionsWinUI.Data.Data
 {
+    /// <summary>
+    /// Classe qui s'occupe de gérer les opérations sur les électeurs.
+    /// Le but du provider est d'éviter d'appeler EF Core directement
+    /// dans les ViewModels (plus conforme au modèle MVVM).
+    /// </summary>
     public class ElecteurDataProvider
     {
         private readonly ElectionsContext _context;
@@ -14,7 +19,7 @@ namespace ProjetElectionsWinUI.Data.Data
         }
 
         // ======================================================
-        // 1. GET ALL ELECTEURS (avec District)
+        // 1. GET ALL ELECTEURS (avec leur district)
         // ======================================================
         public List<Electeur> GetAll()
         {
@@ -39,6 +44,7 @@ namespace ProjetElectionsWinUI.Data.Data
         // ======================================================
         public List<Electeur> GetByDistrict(int districtId)
         {
+            // Sert surtout si on veut lister les électeurs d’un district précis.
             return _context.Electeurs
                 .Include(e => e.District)
                 .Where(e => e.DistrictElectoralId == districtId)
@@ -60,6 +66,8 @@ namespace ProjetElectionsWinUI.Data.Data
         // ======================================================
         public void Update(Electeur electeur)
         {
+            // EF Core détecte automatiquement que l’objet existe,
+            // donc Update suffit pour réappliquer les modifications.
             _context.Electeurs.Update(electeur);
             _context.SaveChanges();
         }

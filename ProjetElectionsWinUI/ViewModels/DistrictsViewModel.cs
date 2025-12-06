@@ -1,50 +1,60 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data;
 using ProjetElectionsWinUI.Data.Data;
+using ProjetElectionsWinUi.Data.Models;
 using ProjetElectionsWinUI.Data.Models;
 using System.Collections.ObjectModel;
 
 namespace ProjetElectionsWinUI.ViewModels
 {
+    /// <summary>
+    /// ViewModel responsable de la gestion des districts.
+    /// On charge la liste des districts, on valide les données du formulaire
+    /// et on utilise le DistrictDataProvider pour faire les opérations CRUD.
+    /// </summary>
     public partial class DistrictsViewModel : ObservableObject
     {
-        // ======================================================
-        //   Providers (accès BD via Data Providers)
-        // ======================================================
+        // ===============================
+        //   Provider (accès BD)
+        // ===============================
         private readonly DistrictDataProvider _districtProvider;
 
-        // ======================================================
-        //   Propriétés observables (MVVM)
-        // ======================================================
+        // ===============================
+        //   Propriétés observables
+        // ===============================
 
+        // Liste affichée dans la ListView
         [ObservableProperty]
         private ObservableCollection<DistrictElectoral> districts;
 
+        // District sélectionné pour le formulaire
         [ObservableProperty]
         private DistrictElectoral selectedDistrict = new DistrictElectoral();
 
+        // Liste des candidats du district sélectionné
         [ObservableProperty]
         private ObservableCollection<Candidat> candidatsDuDistrict = new();
 
+        // Description du gagnant (affiché dans la page)
         [ObservableProperty]
         private string gagnantDescription;
 
+        // Quand l'utilisateur change de district → recharge la liste des candidats associés
         partial void OnSelectedDistrictChanged(DistrictElectoral value)
         {
             LoadCandidatsDuDistrict();
         }
 
-        // ======================================================
-        //   Messages d’erreur (validation)
-        // ======================================================
+        // ===============================
+        //   Messages d’erreur (MVVM)
+        // ===============================
         [ObservableProperty] private string nomDistrictErreur;
         [ObservableProperty] private string populationErreur;
 
-        // ======================================================
+        // ===============================
         //   Constructeur
-        // ======================================================
+        // ===============================
         public DistrictsViewModel()
         {
             var context = new ElectionsContext();
@@ -53,22 +63,23 @@ namespace ProjetElectionsWinUI.ViewModels
             LoadDistricts();
         }
 
-        // ======================================================
-        //   Chargement des données
-        // ======================================================
+        // ===============================
+        //   Chargement de la liste
+        // ===============================
         private void LoadDistricts()
         {
             var list = _districtProvider.GetAll();
             Districts = new ObservableCollection<DistrictElectoral>(list);
         }
 
-        // ======================================================
-        //   Validation
-        // ======================================================
+        // ===============================
+        //   Validation des champs
+        // ===============================
         private bool ValiderDistrict()
         {
             bool estValide = true;
 
+            // Reset des messages d’erreur
             NomDistrictErreur = "";
             PopulationErreur = "";
 
@@ -87,15 +98,16 @@ namespace ProjetElectionsWinUI.ViewModels
             return estValide;
         }
 
-        // ======================================================
-        //   Commande : Ajouter un district
-        // ======================================================
+        // ===============================
+        //   Ajouter un district
+        // ===============================
         [RelayCommand]
         private void AddDistrict()
         {
+            // Empêche d’ajouter un district déjà existant
             if (SelectedDistrict != null && SelectedDistrict.DistrictElectoralId != 0)
             {
-                NomDistrictErreur = "Ce district existe déjà. Utilisez Modifier pour vider le formulaire.";
+                NomDistrictErreur = "Vous ne pouvez pas ajouter un District qui est sélectionné dans la liste. Utilisez Modifier pour vider le formulaire.";
                 return;
             }
 
@@ -114,9 +126,9 @@ namespace ProjetElectionsWinUI.ViewModels
             SelectedDistrict = new DistrictElectoral();
         }
 
-        // ======================================================
-        //   Commande : Modifier un district
-        // ======================================================
+        // ===============================
+        //   Modifier un district
+        // ===============================
         [RelayCommand]
         private void UpdateDistrict()
         {
@@ -132,9 +144,9 @@ namespace ProjetElectionsWinUI.ViewModels
             SelectedDistrict = new DistrictElectoral();
         }
 
-        // ======================================================
-        //   Commande : Supprimer un district
-        // ======================================================
+        // ===============================
+        //   Supprimer un district
+        // ===============================
         public void DeleteDistrict()
         {
             if (SelectedDistrict == null || SelectedDistrict.DistrictElectoralId == 0)
@@ -146,9 +158,9 @@ namespace ProjetElectionsWinUI.ViewModels
             SelectedDistrict = new DistrictElectoral();
         }
 
-        // ======================================================
-        //   Charger les candidats du district + gagnant
-        // ======================================================
+        // ===============================
+        //   Candidats + gagnant du district
+        // ===============================
         private void LoadCandidatsDuDistrict()
         {
             CandidatsDuDistrict.Clear();
@@ -160,11 +172,13 @@ namespace ProjetElectionsWinUI.ViewModels
                 return;
             }
 
+            // On récupère les candidats via le provider
             var candidats = _districtProvider.GetCandidatsByDistrict(SelectedDistrict.DistrictElectoralId);
 
             foreach (var c in candidats)
                 CandidatsDuDistrict.Add(c);
 
+            // On détermine le gagnant
             var gagnant = _districtProvider.GetGagnant(SelectedDistrict.DistrictElectoralId);
 
             if (gagnant != null)

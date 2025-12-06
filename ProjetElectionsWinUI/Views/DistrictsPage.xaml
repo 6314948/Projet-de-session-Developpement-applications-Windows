@@ -6,6 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <!-- 
+        J'ai mis un ScrollViewer au cas où la fenêtre devient trop petite.
+        Ça évite que le bas de page soit coupé.
+    -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
 
         <Grid Padding="20">
@@ -14,26 +18,24 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
 
-            <!-- ===================================== -->
-            <!--               TITRE                   -->
-            <!-- ===================================== -->
+            <!-- =========================== -->
+            <!--          TITRE PAGE         -->
+            <!-- =========================== -->
             <TextBlock Text="Gestion des districts"
                        FontSize="32"
                        FontWeight="Bold"
                        AutomationProperties.HeadingLevel="Level1"
-                       AutomationProperties.Name="Titre de la page : Gestion des districts"
                        Margin="0 0 0 20"
                        Grid.ColumnSpan="2" />
 
-            <!-- ===================================== -->
-            <!--     LISTE DES DISTRICTS (COLONNE 0)   -->
-            <!-- ===================================== -->
+            <!-- =========================== -->
+            <!--     LISTE DES DISTRICTS     -->
+            <!-- =========================== -->
             <ListView Grid.Column="0"
                       Margin="0 60 20 0"
                       ItemsSource="{Binding Districts}"
                       SelectedItem="{Binding SelectedDistrict, Mode=TwoWay}"
-                      AutomationProperties.Name="Liste des districts"
-                      TabIndex="0">
+                      AutomationProperties.Name="Liste des districts">
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -41,11 +43,13 @@
                                     Padding="10"
                                     Background="#E5E5E5"
                                     CornerRadius="6">
+
+                            <!-- Nom du district -->
                             <TextBlock Text="{Binding NomDistrict}"
                                        FontSize="20"
-                                       FontWeight="SemiBold"
-                                       AutomationProperties.Name="{Binding NomDistrict}" />
+                                       FontWeight="SemiBold" />
 
+                            <!-- Population -->
                             <TextBlock Text="Population :" FontWeight="SemiBold" />
                             <TextBlock Text="{Binding Population}" />
                         </StackPanel>
@@ -54,48 +58,42 @@
 
             </ListView>
 
-            <!-- ===================================== -->
-            <!--   COLONNE 1 : FORMULAIRE + CANDIDATS  -->
-            <!-- ===================================== -->
+            <!-- =========================== -->
+            <!-- FORMULAIRE + LISTE CAND.   -->
+            <!-- =========================== -->
             <Grid Grid.Column="1" Margin="20 60 0 0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!-- =============================== -->
-                <!--   FORMULAIRE DISTRICT (ROW 0)   -->
-                <!-- =============================== -->
-                <StackPanel Grid.Row="0"
-                            Spacing="10">
+                <!-- =========================== -->
+                <!--       FORMULAIRE DISTRICT   -->
+                <!-- =========================== -->
+                <StackPanel Grid.Row="0" Spacing="10">
 
                     <!-- Nom du district -->
-                    <TextBlock Text="Nom du district :" FontWeight="SemiBold"
-                               AutomationProperties.HeadingLevel="Level2" />
+                    <TextBlock Text="Nom du district :" FontWeight="SemiBold" />
 
                     <TextBox Text="{Binding SelectedDistrict.NomDistrict, Mode=TwoWay}"
                              PlaceholderText="Ex: Hull"
-                             AutomationProperties.Name="Champ : Nom du district"
-                             TabIndex="1" />
+                             AutomationProperties.Name="Champ : Nom du district" />
 
                     <TextBlock Text="{Binding NomDistrictErreur}"
                                Foreground="Red"
                                FontSize="12"
-                               AutomationProperties.Name="Erreur : nom du district"
-                               TextWrapping="Wrap"/>
+                               TextWrapping="Wrap" />
 
                     <!-- Population -->
                     <TextBlock Text="Population :" FontWeight="SemiBold" />
 
                     <TextBox Text="{Binding SelectedDistrict.Population, Mode=TwoWay}"
                              PlaceholderText="Ex: 72000"
-                             AutomationProperties.Name="Champ : Population du district"
-                             TabIndex="2" />
+                             AutomationProperties.Name="Champ : Population du district" />
 
                     <TextBlock Text="{Binding PopulationErreur}"
                                Foreground="Red"
-                               FontSize="12"
-                               AutomationProperties.Name="Erreur : population du district" />
+                               FontSize="12" />
 
                     <!-- Boutons CRUD -->
                     <StackPanel Orientation="Horizontal"
@@ -104,27 +102,22 @@
 
                         <Button Content="Ajouter"
                                 Width="100"
-                                Command="{Binding AddDistrictCommand}"
-                                AutomationProperties.Name="Bouton : Ajouter un district"
-                                TabIndex="3" />
+                                Command="{Binding AddDistrictCommand}" />
 
                         <Button Content="Modifier"
                                 Width="100"
-                                Command="{Binding UpdateDistrictCommand}"
-                                AutomationProperties.Name="Bouton : Modifier le district sélectionné"
-                                TabIndex="4" />
+                                Command="{Binding UpdateDistrictCommand}" />
 
+                        <!-- Suppression via code-behind -->
                         <Button Content="Supprimer"
                                 Width="100"
-                                Click="Supprimer_Click"
-                                AutomationProperties.Name="Bouton : Supprimer le district sélectionné"
-                                TabIndex="5" />
+                                Click="Supprimer_Click" />
                     </StackPanel>
                 </StackPanel>
 
-                <!-- ========================================= -->
-                <!--   CANDIDATS DU DISTRICT (ROW 1)           -->
-                <!-- ========================================= -->
+                <!-- =========================== -->
+                <!--  CANDIDATS DU DISTRICT       -->
+                <!-- =========================== -->
                 <Grid Grid.Row="1" Margin="0 40 0 0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -132,29 +125,25 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <!-- Titre -->
+                    <!-- Sous-titre -->
                     <TextBlock Grid.Row="0"
                                Text="Candidats du district selectionne"
                                FontSize="20"
                                FontWeight="Bold"
-                               AutomationProperties.HeadingLevel="Level2"
                                Margin="0 0 0 10" />
 
-                    <!-- Gagnant (calcul LINQ) -->
+                    <!-- Gagnant -->
                     <TextBlock Grid.Row="1"
                                Text="{Binding GagnantDescription}"
                                FontSize="16"
                                FontWeight="SemiBold"
-                               AutomationProperties.Name="Candidat gagnant du district"
                                Margin="0 0 0 20"
                                TextWrapping="Wrap"
                                Foreground="#333" />
 
-                    <!-- Liste candidats -->
+                    <!-- Liste des candidats -->
                     <ListView Grid.Row="2"
-                              ItemsSource="{Binding CandidatsDuDistrict}"
-                              AutomationProperties.Name="Liste des candidats du district sélectionné"
-                              TabIndex="6">
+                              ItemsSource="{Binding CandidatsDuDistrict}">
 
                         <ListView.ItemTemplate>
                             <DataTemplate>
@@ -162,10 +151,10 @@
                                             Padding="10"
                                             Background="#F5F5F5"
                                             CornerRadius="6">
+
                                     <TextBlock Text="{Binding Nom}"
                                                FontSize="18"
-                                               FontWeight="SemiBold"
-                                               AutomationProperties.Name="{Binding Nom}" />
+                                               FontWeight="SemiBold" />
 
                                     <TextBlock Text="{Binding PartiPolitique}" />
 
